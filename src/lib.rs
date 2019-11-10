@@ -35,6 +35,11 @@ impl<F: FnOnce()> FnBox for F {
 
 type Job = Box<dyn FnBox + Send + 'static>;
 
+enum Message {
+    NewJob(Job),
+    Terminate,
+}
+
 pub struct ThreadPool {
     workers: Vec<Worker>,
     sender: mpsc::Sender<Job>,
