@@ -90,6 +90,17 @@ impl ThreadPool {
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
+        println!("Sending terminate message to all workers.");
+
+        // we need two separate for-loops because we couldn't guarantee that
+        // the worker in the current iteration would be the same one to get the message from the channel.
+        // (if the worker sent Terminate was busy, then another worker would receive the message instead.)
+        for _ in &self.workers {
+            self.sender.send(Message::Terminate).unwrap();
+        }
+
+        println!("Shutting down all workers.");
+
         for worker in &mut self.workers {
             println!("Shutting down worker {}", worker.id);
 
